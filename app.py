@@ -44,18 +44,25 @@ def create_messages_table(dynamodb=None):
      return table
 
 
-@app.route('/reply', methods['GET'])
-def replyToDirectMessage(msgID, recipient, sender, reply, quick_reply=None, dynamodb=None):
+@app.route('/reply', methods['POST'])
+def replyToDirectMessage():
     if not dynamodb:
         dynamodb = boto3.resource('dynamodb', endpoint_url="http://localhost:8000")
 
-    # Quick Reply message options
-    if quick_reply == 1:
-        reply = "Can't talk now."
-    elif quick_reply == 2:
-        reply = "On my way!"
-    elif quick_reply == 3:
-        reply = "Hey :)"
+    request_data = request.get_json()
+    msgID = request_data['msg_id']
+    recipient = request_data['recipient']
+    sender = request_data['sender']
+    reply = request_data['reply']
+    quick_reply = request_data.get('quick_reply')
+    if request_data.get('quick_reply'):
+        # Quick Reply message options
+        if quick_reply == 1:
+            reply = "Can't talk now."
+        elif quick_reply == 2:
+            reply = "On my way!"
+        elif quick_reply == 3:
+            reply = "Hey :)"
 
     newMsgID = random.randint(0,10000)
 
